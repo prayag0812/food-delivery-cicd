@@ -18,7 +18,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh 'docker rm -f food-container || true'
-                sh 'docker run -d -p 8080:80 --name food-container food-app'
+                sh 'docker run -d -p 8081:80 --name food-container food-app'
             }
         }
     }
