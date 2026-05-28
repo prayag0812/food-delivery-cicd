@@ -1,1 +1,57 @@
+---
+- hosts: master
+  become: yes
 
+  tasks:
+
+    - name: Install Java
+      apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+
+    - name: Install Jenkins dependencies
+      apt:
+        name:
+          - wget
+          - gnupg
+        state: present
+
+    - name: Add Jenkins key
+      shell: |
+        wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | apt-key add -
+
+    - name: Add Jenkins repo
+      shell: |
+        echo "deb https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
+
+    - name: Install Jenkins
+      shell: |
+        apt update
+        apt install jenkins -y
+
+    - name: Start Jenkins
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+
+- hosts: agent
+  become: yes
+
+  tasks:
+
+    - name: Install Java and Docker
+      apt:
+        name:
+          - openjdk-17-jdk
+          - docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
