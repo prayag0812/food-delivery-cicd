@@ -4,28 +4,29 @@
 
   tasks:
 
-    - name: Install Java
+    - name: Install Java and dependencies
       apt:
-        name: openjdk-17-jdk
+        name:
+          - openjdk-17-jdk
+          - wget
         state: present
         update_cache: yes
 
-    - name: Install Jenkins dependencies
-      apt:
-        name:
-          - wget
-          - gnupg
-          - curl
-        state: present
+    - name: Create apt keyrings directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
 
-    - name: Add Jenkins repository key
+    - name: Add Jenkins key
       shell: |
-        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee \
-        /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+        wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+        https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
 
     - name: Add Jenkins repository
       shell: |
-        echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | tee \
+        echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] \
+        https://pkg.jenkins.io/debian-stable binary/" | tee \
         /etc/apt/sources.list.d/jenkins.list > /dev/null
 
     - name: Update apt cache
