@@ -15,20 +15,27 @@
         name:
           - wget
           - gnupg
+          - curl
         state: present
 
-    - name: Add Jenkins key
+    - name: Add Jenkins repository key
       shell: |
-        wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | apt-key add -
+        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee \
+        /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 
-    - name: Add Jenkins repo
+    - name: Add Jenkins repository
       shell: |
-        echo "deb https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
+        echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | tee \
+        /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
 
     - name: Install Jenkins
-      shell: |
-        apt update
-        apt install jenkins -y
+      apt:
+        name: jenkins
+        state: present
 
     - name: Start Jenkins
       service:
